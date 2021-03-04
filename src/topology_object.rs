@@ -1,11 +1,11 @@
-use libc::{c_int, c_uint, c_ulonglong, c_char, c_void, c_float, c_ushort, c_uchar};
+use libc::{c_char, c_float, c_int, c_uchar, c_uint, c_ulonglong, c_ushort, c_void};
 use std::ffi::{CStr, CString};
 use std::fmt;
 
-use ffi::ObjectType;
 use ffi;
+use ffi::ObjectType;
 
-use bitmap::{IntHwlocBitmap, CpuSet, NodeSet};
+use bitmap::{CpuSet, IntHwlocBitmap, NodeSet};
 
 #[repr(C)]
 pub struct TopologyObject {
@@ -36,9 +36,9 @@ pub struct TopologyObject {
     complete_nodeset: *mut IntHwlocBitmap,
     allowed_nodeset: *mut IntHwlocBitmap,
     distances: *mut *mut TopologyObjectDistances, // TODO: getter
-    distances_count: c_uint, // TODO: getter
-    infos: *mut TopologyObjectInfo, // TODO: getter
-    infos_count: c_uint, // TODO: getter
+    distances_count: c_uint,                      // TODO: getter
+    infos: *mut TopologyObjectInfo,               // TODO: getter
+    infos_count: c_uint,                          // TODO: getter
     symmetric_subtree: c_int,
 }
 
@@ -227,7 +227,13 @@ impl TopologyObject {
     }
 
     fn deref_topology(&self, p: &*mut TopologyObject) -> Option<&TopologyObject> {
-        unsafe { if p.is_null() { None } else { Some(&**p) } }
+        unsafe {
+            if p.is_null() {
+                None
+            } else {
+                Some(&**p)
+            }
+        }
     }
 
     fn deref_cpuset(&self, p: *mut IntHwlocBitmap) -> Option<CpuSet> {
@@ -264,25 +270,32 @@ impl fmt::Debug for TopologyObject {
 
 impl fmt::Display for TopologyObject {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		let mut buf_type = [0; 64];
-		let mut buf_attr = [0; 2048];
+        let mut buf_type = [0; 64];
+        let mut buf_attr = [0; 2048];
 
-
-		let separator = b"  \0".as_ptr() as * const c_char;
+        let separator = b"  \0".as_ptr() as *const c_char;
 
         unsafe {
-            ffi::hwloc_obj_type_snprintf(buf_type.as_mut_ptr(), buf_type.len() as c_int, &*self as *const TopologyObject, false);
-            ffi::hwloc_obj_attr_snprintf(buf_attr.as_mut_ptr(),
-                                         buf_attr.len() as c_int,
-                                         &*self as *const TopologyObject,
-                                         separator,
-                                         false);
+            ffi::hwloc_obj_type_snprintf(
+                buf_type.as_mut_ptr(),
+                buf_type.len() as c_int,
+                &*self as *const TopologyObject,
+                false,
+            );
+            ffi::hwloc_obj_attr_snprintf(
+                buf_attr.as_mut_ptr(),
+                buf_attr.len() as c_int,
+                &*self as *const TopologyObject,
+                separator,
+                false,
+            );
 
-
-            write!(f,
-                   "{} ({})",
-                   CStr::from_ptr(buf_type.as_ptr()).to_str().unwrap(),
-                   CStr::from_ptr(buf_attr.as_ptr()).to_str().unwrap())
+            write!(
+                f,
+                "{} ({})",
+                CStr::from_ptr(buf_type.as_ptr()).to_str().unwrap(),
+                CStr::from_ptr(buf_attr.as_ptr()).to_str().unwrap()
+            )
         }
     }
 }
@@ -291,7 +304,7 @@ impl fmt::Display for TopologyObject {
 pub struct TopologyObjectMemory {
     total_memory: c_ulonglong,
     local_memory: c_ulonglong,
-    page_types_len: c_uint, // todo: getter
+    page_types_len: c_uint,                        // todo: getter
     page_types: *mut TopologyObjectMemoryPageType, // todo: getter
 }
 
