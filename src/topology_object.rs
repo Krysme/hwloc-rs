@@ -256,6 +256,12 @@ impl TopologyObject {
     }
 }
 
+impl fmt::Debug for TopologyObject {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(self, f)
+    }
+}
+
 impl fmt::Display for TopologyObject {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		let mut buf_type = [0; 64];
